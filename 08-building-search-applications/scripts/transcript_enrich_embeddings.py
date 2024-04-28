@@ -18,6 +18,8 @@ from tenacity import (
     retry_if_not_exception_type,
 )
 from rich.progress import Progress
+from dotenv import load_dotenv
+load_dotenv()
 
 API_KEY = os.environ["AZURE_OPENAI_API_KEY"]
 RESOURCE_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"]

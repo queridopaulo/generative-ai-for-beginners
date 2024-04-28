@@ -17,28 +17,23 @@ from tenacity import (
     stop_after_attempt,
     retry_if_not_exception_type,
 )
+from dotenv import load_dotenv
+load_dotenv()
 
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-API_KEY = os.environ["AZURE_OPENAI_API_KEY"]
-RESOURCE_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"]
+API_KEY = os.environ["LMSTUDIO_API_KEY"]
+RESOURCE_ENDPOINT = os.environ["LMSTUDIO_ENDPOINT"]
 TRANSCRIPT_FOLDER = "transcripts"
-PROCESSING_THREADS = 10
 SEGMENT_MIN_LENGTH_MINUTES = 3
-OPENAI_REQUEST_TIMEOUT = 60
+PROCESSING_THREADS = 10
 
-OPENAI_MAX_TOKENS = 512
-AZURE_OPENAI_MODEL_DEPLOYMENT_NAME = os.getenv(
-    "AZURE_OPENAI_MODEL_DEPLOYMENT_NAME", "gpt-35-turbo"
-)
+MODEL_NAME = "QuantFactory/Meta-Llama-3-8B-GGUF"
 
-
-openai.api_type = "azure"
 openai.api_key = API_KEY
 openai.api_base = RESOURCE_ENDPOINT
-openai.api_version = "2023-07-01-preview"
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", "--folder")
@@ -47,20 +42,20 @@ args = parser.parse_args()
 if args.verbose:
     logger.setLevel(logging.DEBUG)
 
-TRANSCRIPT_FOLDER = args.folder if args.folder else None
+TRANSCRIPT_FOLDER = args.folder if args.folder else '/home/pquerido/ai/course/generative-ai-for-beginners/08-building-search-applications/scripts/transcripts_the_ai_show'
 if not TRANSCRIPT_FOLDER:
     logger.error("Transcript folder not provided")
     exit(1)
 
 get_speaker_name = {
     "name": "get_speaker_name",
-    "description": "Get the speaker names for the session.",
+    "description": "Get the speaker's name for the session.",
     "parameters": {
         "type": "object",
         "properties": {
             "speakers": {
                 "type": "string",
-                "description": "The speaker names.",
+                "description": "The speaker's name.",
             }
         },
         "required": ["speaker_name"],
@@ -109,18 +104,15 @@ def get_speaker_info(text):
     arguments = None
 
     response_1 = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
+        model=MODEL_NAME,
         messages=[
             {
                 "role": "system",
-                "content": "You are an AI assistant that can extract speaker names from text as a list of comma separated names. Try and extract the speaker names from the title. Speaker names are usually less than 3 words long.",
+                "content": "You are an AI assistant that talks European Portuguese, and are capable of making API calls.",
             },
-            {"role": "user", "content": text},
+            {"role": "user", "content": "What's the speaker's name given the following text? " + text},
         ],
         functions=openai_functions,
-        max_tokens=OPENAI_MAX_TOKENS,
-        engine=AZURE_OPENAI_MODEL_DEPLOYMENT_NAME,
-        request_timeout=OPENAI_REQUEST_TIMEOUT,
         function_call={"name": "get_speaker_name"},
         temperature=0.0,
     )

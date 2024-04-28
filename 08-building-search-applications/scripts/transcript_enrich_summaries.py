@@ -14,20 +14,17 @@ from tenacity import (
     retry_if_not_exception_type,
 )
 from rich.progress import Progress
+from dotenv import load_dotenv
+load_dotenv()
 
-API_KEY = os.environ["AZURE_OPENAI_API_KEY"]
-RESOURCE_ENDPOINT = os.environ["AZURE_OPENAI_ENDPOINT"]
-AZURE_OPENAI_MODEL_DEPLOYMENT_NAME = os.getenv(
-    "AZURE_OPENAI_MODEL_DEPLOYMENT_NAME", "gpt-35-turbo"
-)
-MAX_TOKENS = 512
+API_KEY = os.environ["LMSTUDIO_API_KEY"]
+RESOURCE_ENDPOINT = os.environ["LMSTUDIO_ENDPOINT"]
+MODEL_NAME = "QuantFactory/Meta-Llama-3-8B-Instruct-GGUF"
+
 PROCESSOR_THREADS = 10
-OPENAI_REQUEST_TIMEOUT = 30
 
-openai.api_type = "azure"
 openai.api_key = API_KEY
 openai.api_base = RESOURCE_ENDPOINT
-openai.api_version = "2023-07-01-preview"
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -87,15 +84,9 @@ def chatgpt_summary(text):
     ]
 
     response = openai.ChatCompletion.create(
-        engine=AZURE_OPENAI_MODEL_DEPLOYMENT_NAME,
+        engine=MODEL_NAME,
         messages=messages,
-        temperature=0.7,
-        max_tokens=MAX_TOKENS,
-        top_p=0.0,
-        frequency_penalty=0,
-        presence_penalty=0,
-        stop=None,
-        request_timeout=OPENAI_REQUEST_TIMEOUT,
+        temperature=0.7
     )
 
     # print(response)

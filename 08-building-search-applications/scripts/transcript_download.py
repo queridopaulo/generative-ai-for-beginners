@@ -11,9 +11,11 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_transcript_api.formatters import WebVTTFormatter
+from dotenv import load_dotenv
+load_dotenv()
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 GOOGLE_DEVELOPER_API_KEY = os.environ["GOOGLE_DEVELOPER_API_KEY"]
@@ -94,7 +96,7 @@ def get_transcript(playlist_item, counter_id):
         return False
 
     try:
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = YouTubeTranscriptApi.get_transcript(video_id, languages=["pt"])
         # remove \n from the text
         for item in transcript:
             item["text"] = item["text"].replace("\n", " ")
@@ -133,7 +135,7 @@ youtube = googleapiclient.discovery.build(
 
 # Create a request object with the playlist ID and the max results
 request = youtube.playlistItems().list(
-    part="snippet", playlistId=PLAYLIST_ID, maxResults=MAX_RESULTS
+    part="snippet", playlistId=PLAYLIST_ID, maxResults=MAX_RESULTS, 
 )
 
 
