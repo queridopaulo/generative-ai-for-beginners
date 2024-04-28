@@ -4,6 +4,8 @@ import json
 import os
 import argparse
 import logging
+from dotenv import load_dotenv
+load_dotenv()
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
